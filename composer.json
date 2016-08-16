@@ -1,0 +1,30 @@
+{
+    "name": "rezzza/jadd",
+    "description": "Jadd : Another Documentation Dumper",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "ReZzZa Team",
+            "email": "dev@verylastroom.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": { "Rezzza\\Jadd\\": "src/" }
+    },
+    "require": {
+        "psr/http-message": "^1.0"
+    },
+    "require-dev": {
+        "symfony/routing": "^3.1",
+        "symfony/config": "^3.1",
+        "symfony/yaml": "^3.1",
+        "guzzlehttp/psr7": "^1.3",
+        "behat/behat": "^3.1",
+        "atoum/atoum": "^2.8",
+        "symfony/process": "^3.1",
+        "rezzza/rest-api-behat-extension": "^5.0",
+        "php-http/curl-client": "^1.5",
+        "php-http/client-common": "^1.2",
+        "rezzza/moco-behat-extension": "^1.0"
+    }
+}
