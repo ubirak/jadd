@@ -9,15 +9,19 @@
         }
     ],
     "autoload": {
-        "psr-4": { "Rezzza\\Jadd\\": "src/" }
+        "psr-4": { "Rezzza\\Jadd\\": "src/" },
+        "classmap": [ "app/CliApp.php", "app/Kernel.php" ]
     },
+    "bin": ["bin/jadd"],
     "require": {
-        "psr/http-message": "^1.0"
-    },
-    "require-dev": {
+        "psr/http-message": "^1.0",
+        "php-di/php-di": "^5.3",
+        "symfony/console": "^3.0",
         "symfony/routing": "^3.1",
         "symfony/config": "^3.1",
-        "symfony/yaml": "^3.1",
+        "symfony/yaml": "^3.1"
+    },
+    "require-dev": {
         "guzzlehttp/psr7": "^1.3",
         "behat/behat": "^3.1",
         "atoum/atoum": "^2.8",
