@@ -1,4 +1,4 @@
-# JADD
+# JADD [![Build Status](https://travis-ci.org/rezzza/jadd.svg?branch=master)](https://travis-ci.org/rezzza/jadd)
 Jadd : Another Documentation Dumper
 
 ## Why ?
