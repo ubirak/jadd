@@ -10,4 +10,5 @@ before_script:
     - vendor/bin/install-moco.sh
 
 script:
+    - vendor/bin/atoum -ulr
     - vendor/bin/behat -f progress

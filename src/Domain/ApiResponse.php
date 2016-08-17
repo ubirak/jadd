@@ -12,7 +12,7 @@ class ApiResponse
 
     private $headers;
 
-    public function __construct($statusCode, $contentType, $body, array $headers = [])
+    public function __construct($statusCode, $contentType = null, $body = null, array $headers = [])
     {
         $this->statusCode = $statusCode;
         $this->setContentType($contentType);
@@ -45,7 +45,8 @@ class ApiResponse
     public function mergeBody($body)
     {
         if (strlen($body) > 0) {
-            $this->body += $this->cleanJson($body);
+            $bodyDecoded = json_decode($this->body, true);
+            $this->body = json_encode(($bodyDecoded ?: []) + $this->cleanJson($body));
         }
     }
 
