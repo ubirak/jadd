@@ -19,7 +19,7 @@ class ApiResponse
         if (strlen($body) > 0) {
             $this->body = json_encode($this->cleanJson($body));
         }
-        $this->setHeaders($headers);
+        $this->headers = $headers;
     }
 
     public function getStatusCode()
@@ -64,11 +64,6 @@ class ApiResponse
                 }
             }
         );
-    }
-
-    private function setHeaders(array $headers)
-    {
-        $this->headers = Endpoint::cleanHeaders($headers);
     }
 
     private function setContentType($contentType)

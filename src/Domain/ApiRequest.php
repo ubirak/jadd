@@ -21,7 +21,7 @@ class ApiRequest
         $this->method = $method;
         $this->uri = parse_url($uri, PHP_URL_PATH);
         $this->setContentType($contentType);
-        $this->setHeaders($headers);
+        $this->headers = $headers;
         if (strlen($body) > 0) {
             $this->body = $body;
         }
@@ -65,11 +65,6 @@ class ApiRequest
     public function needToBeDocumented()
     {
         return count($this->headers) > 0 || null !== $this->jsonSchema || null !== $this->getBody();
-    }
-
-    private function setHeaders(array $headers)
-    {
-        $this->headers = Endpoint::cleanHeaders($headers);
     }
 
     private function setContentType($contentType)
