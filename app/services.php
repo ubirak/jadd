@@ -5,6 +5,7 @@ use Rezzza\Jadd\Ui;
 use Rezzza\Jadd\Infra\APIBlueprintFormatter;
 use Rezzza\Jadd\Infra\Filesystem\CsvEndpointStorage;
 use Rezzza\Jadd\Infra\Filesystem\FilesystemDumper;
+use Rezzza\Jadd\Infra\Filesystem\FileReader;
 use Rezzza\Jadd\Infra\Symfony\SymfonyRouter;
 use Symfony\Component\Routing\Loader\YamlFileLoader;
 use Symfony\Component\Config\FileLocator;
@@ -24,7 +25,7 @@ return [
                 new YamlFileLoader(new FileLocator($c->get('working.dir'))),
                 new Domain\EndpointCollector(new CsvEndpointStorage())
             ),
-            new APIBlueprintFormatter($c->get('working.dir')),
+            new APIBlueprintFormatter(new FileReader($c->get('working.dir'))),
             new FilesystemDumper
         );
     },
