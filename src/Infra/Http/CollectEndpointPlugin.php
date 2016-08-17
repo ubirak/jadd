@@ -12,9 +12,10 @@ class CollectEndpointPlugin implements Plugin
 {
     private $collector;
 
-    public function __construct()
+    public function __construct(array $filteredHeaders = [])
     {
         $this->collector = new EndpointCollector(new CsvEndpointStorage);
+        $this->collector->addHeadersToFilter($filteredHeaders);
     }
 
     public function handleRequest(RequestInterface $request, callable $next, callable $first)

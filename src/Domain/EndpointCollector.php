@@ -11,6 +11,8 @@ class EndpointCollector
 
     private $storage;
 
+    private $filteredHeaders = ['Cache-Control', 'Content-Type', 'Date', 'Content-Encoding', 'Content-Length', 'Host'];
+
     public function __construct(EndpointStorage $storage)
     {
         $this->storage = $storage;
@@ -27,6 +29,11 @@ class EndpointCollector
         file_put_contents(self::filename(), '');
     }
 
+    public function addHeadersToFilter(array $headers)
+    {
+        $this->filteredHeaders = array_merge($this->filteredHeaders, $headers);
+    }
+
     public function collect(RequestInterface $request, ResponseInterface $response)
     {
         $requestBody = (string) $request->getBody();
@@ -38,14 +45,14 @@ class EndpointCollector
                     $request->getMethod(),
                     (string) $request->getUri(),
                     $request->getHeader('Content-Type') ?: null,
-                    $request->getHeaders(),
+                    $this->cleanHeaders($request->getHeaders()),
                     $requestBody
                 ),
                 new ApiResponse(
                     $response->getStatusCode(),
                     $response->getHeader('Content-Type') ?: null,
                     $responseBody,
-                    $response->getHeaders()
+                    $this->cleanHeaders($response->getHeaders())
                 )
             )
         );
@@ -54,5 +61,18 @@ class EndpointCollector
     public function read()
     {
         return $this->storage->readAll();
+    }
+
+    private function cleanHeaders(array $headers)
+    {
+        // Could be simplified with array_filter and ARRAY_FILTER_USE_KEY when dropping PHP 5.5 support
+        return array_intersect_key(
+            $headers,
+            array_flip(
+                array_filter(array_keys($headers), function ($key) {
+                    return false === in_array($key, $this->filteredHeaders);
+                })
+            )
+        );
     }
 }
