@@ -3,14 +3,15 @@
 namespace Rezzza\Jadd\Infra;
 
 use Rezzza\Jadd\Domain\OutputFormatter;
+use Rezzza\Jadd\Infra\Filesystem\FileReader;
 
 class APIBlueprintFormatter implements OutputFormatter
 {
-    private $rootDir;
+    private $fileReader;
 
-    public function __construct($rootDir)
+    public function __construct(FileReader $fileReader)
     {
-        $this->rootDir = $rootDir;
+        $this->fileReader = $fileReader;
     }
 
     public function formatRoutes(array $routes)
@@ -43,12 +44,8 @@ class APIBlueprintFormatter implements OutputFormatter
 
                 $jsonSchema = $request->getJsonSchema();
                 if (null !== $jsonSchema) {
-                    $jsonSchemaFile = rtrim($this->rootDir, '/').DIRECTORY_SEPARATOR.ltrim($jsonSchema, '/');
-                    if (false === file_exists($jsonSchemaFile)) {
-                        throw new \LogicException(sprintf('%s does not exists for route %s', $jsonSchemaFile, $route->getId()));
-                    }
                     $output .= $this->addSubtitle('Schema', 2);
-                    $output .= $this->addIndentation(file_get_contents($jsonSchemaFile), 12);
+                    $output .= $this->addIndentation($this->fileReader->read($jsonSchema), 12);
                     $output .= "\n\n";
                 }
 
