@@ -5,23 +5,13 @@ use Behat\Gherkin\Node\PyStringNode;
 use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
 use Behat\Behat\Context\SnippetAcceptingContext;
-use Symfony\Component\Routing\Loader\YamlFileLoader;
-use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\PhpExecutableFinder;
 
 use Rezzza\Jadd\Domain;
-use Rezzza\Jadd\Infra\APIBlueprintFormatter;
-use Rezzza\Jadd\Infra\Filesystem\CsvEndpointStorage;
-use Rezzza\Jadd\Infra\Filesystem\FilesystemDumper;
-use Rezzza\Jadd\Infra\Symfony\SymfonyRouter;
 
 class FeatureContext implements Context, SnippetAcceptingContext
 {
-    private $collector;
-
-    private $documentationGenerator;
-
     private $asserter;
 
     private $phpBin;
@@ -35,16 +25,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
     public function __construct()
     {
         $this->workingDir = self::workingDir().DIRECTORY_SEPARATOR.md5(microtime() * rand(0, 10000));
-
         $this->asserter = new asserter\generator;
-        $this->documentationGenerator = new Domain\DocumentationGenerator(
-            new SymfonyRouter(
-                new YamlFileLoader(new FileLocator($this->workingDir)),
-                new Domain\EndpointCollector(new CsvEndpointStorage())
-            ),
-            new APIBlueprintFormatter($this->workingDir),
-            new FilesystemDumper
-        );
     }
 
     /**
@@ -132,7 +113,16 @@ class FeatureContext implements Context, SnippetAcceptingContext
      */
     public function iGenerateTheDocumentation($routingFile)
     {
-        $this->documentationGenerator->generate($routingFile, $this->workingDir.'/doc.md');
+        $this->process->setWorkingDirectory($this->workingDir);
+        $this->process->setCommandLine(sprintf(
+            '%s %s %s %s',
+            $this->phpBin,
+            escapeshellarg(getcwd().'/bin/jadd'),
+            'generate',
+            $routingFile.' '.$this->workingDir.'/doc.md'
+        ));
+        $this->process->start();
+        $this->process->wait();
     }
 
     /**
