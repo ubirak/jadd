@@ -72,6 +72,22 @@ Feature: Collect endpoints when running tests
                         '''
                         {
                             "request": {
+                                "uri": "/hotels/wrong",
+                                "method": "GET",
+                                "headers": {
+                                    "content-type" : "application/json"
+                                }
+                            },
+                            "response": {
+                                "status" : 502,
+                                "text": "Bad Gateway"
+                            }
+                        }
+                        '''
+                    And I mock the following endpoint:
+                        '''
+                        {
+                            "request": {
                                 "uri": "/hotels",
                                 "method": "POST",
                                 "headers": {
@@ -123,6 +139,7 @@ Feature: Collect endpoints when running tests
                         }
                         '''
                     When I set "Content-Type" header equal to "application/json"
+                    And I send a GET request to "/hotels/wrong"
                     And I send a POST request to "/hotels" with body:
                         '''
                         {"name":"hotel blue"}

@@ -36,6 +36,12 @@ class EndpointCollector
 
     public function collect(RequestInterface $request, ResponseInterface $response)
     {
+        if (false === in_array('application/json', $response->getHeader('Content-Type'))) {
+            // Don't collect something not in JSON.
+            // @todo Need to find a way to notice people
+            return;
+        }
+
         $requestBody = (string) $request->getBody();
         $responseBody = (string) $response->getBody();
 
