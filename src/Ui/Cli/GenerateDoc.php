@@ -36,5 +36,21 @@ class GenerateDoc extends Command
             $input->getArgument('routing_file'),
             $input->getArgument('output')
         );
+
+        $coverage = $this->documentationGenerator->readCoverage();
+
+        if ($coverage->hasRoutesWithoutValidRequest()) {
+            $output->writeln('Missing valid requests (200 <= statusCode < 400):');
+            foreach ($coverage->routesWithoutValidRequest() as $routeId) {
+                $output->writeln(sprintf('    * %s', $routeId));
+            }
+        }
+
+        if ($coverage->hasRoutesWithoutAvailableResponses()) {
+            $output->writeln('Missing available responses:');
+            foreach ($coverage->routesWithoutAvailableResponses() as $routeId) {
+                $output->writeln(sprintf('    * %s', $routeId));
+            }
+        }
     }
 }

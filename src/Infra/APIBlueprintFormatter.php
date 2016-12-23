@@ -19,6 +19,13 @@ class APIBlueprintFormatter implements OutputFormatter
         $output = $this->addTitle('Your project', 1);
 
         foreach ($routes as $route) {
+            $request = $route->getRequest();
+            $availableResponses = $route->getAvailableResponses();
+
+            if (count($availableResponses) <= 0) {
+                continue;
+            }
+
             $output .= $this->addTitle(
                 sprintf(
                     '%s [%s %s]',
@@ -37,8 +44,7 @@ class APIBlueprintFormatter implements OutputFormatter
                 $output .= "\n";
             }
 
-            $request = $route->getRequest();
-            if ($request->needToBeDocumented()) {
+            if (null !== $request && $request->needToBeDocumented()) {
                 $output .= $this->addSubtitle(sprintf('Request (%s)', $request->getContentType()), 1);
                 $output .= $this->outputKeyValue('Headers', $request->getHeaders());
 

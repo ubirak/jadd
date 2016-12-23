@@ -6,6 +6,7 @@ use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\RouteCompiler;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\Loader\YamlFileLoader;
+use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 
 use Rezzza\Jadd\Domain\EndpointCollector;
 use Rezzza\Jadd\Domain\Route;
@@ -17,46 +18,59 @@ class SymfonyRouter implements Router
 
     private $endpointCollector;
 
-    public function __construct(YamlFileLoader $routeLoader, EndpointCollector $endpointCollector)
+    public function __construct(YamlFileLoader $routeLoader)
     {
         $this->routeLoader = $routeLoader;
-        $this->endpointCollector = $endpointCollector;
     }
 
-    public function loadRoutes($routingFile)
+    public function loadRoutes(array $endpoints, $routingFile)
     {
         $routeCollection = $this->routeLoader->load($routingFile);
 
         $urlMatcher = new UrlMatcher($routeCollection, new RequestContext());
 
-        $endpoints = $this->endpointCollector->read();
         $routes = [];
 
-        foreach ($endpoints as $endpoint) {
-            $request = $endpoint->getRequest();
-            $urlMatcher->setContext(new RequestContext('', $request->getMethod()));
-            $matchedRoute = $urlMatcher->match($request->getUri());
-            $routeName = $matchedRoute['_route'];
-            $symfonyRoute = $routeCollection->get($matchedRoute['_route']);
-
+        foreach ($routeCollection as $routeName => $symfonyRoute) {
             if (false === array_key_exists($routeName, $routes)) {
                 $documentation = $symfonyRoute->getOption('_documentation');
                 $compiledRoute = RouteCompiler::compile($symfonyRoute);
                 $routes[$routeName] = new Route(
                     $routeName,
-                    $request->getMethod(),
                     $symfonyRoute->getPath(),
                     $compiledRoute->getPathVariables(),
                     $documentation['description']
                 );
             }
 
-            if ($endpoint->hasSuccessfulResponse()) {
-                $jsonSchemas = $symfonyRoute->getDefault('_jsonSchema');
-                $routes[$routeName]->defineRequest($request, $jsonSchemas['request']);
-            }
+            $endpointsMatched = array_values( // only here to read numeric keys
+                array_filter(
+                $endpoints,
+                function ($endpoint) use ($urlMatcher, $routeName) {
+                    $request = $endpoint->getRequest();
+                    $urlMatcher->setContext(new RequestContext('', $request->getMethod()));
+                    try {
+                        $matchedRoute = $urlMatcher->match($request->getUri());
 
-            $routes[$routeName]->addResponse($endpoint->getResponse());
+                        return $matchedRoute['_route'] === $routeName;
+                    } catch (ResourceNotFoundException $exception) {
+                        return false;
+                    }
+                }
+            ));
+
+            foreach ($endpointsMatched as $index => $endpoint) {
+                if ($index < 1) {
+                    $routes[$routeName]->defineMethod($endpoint->getRequest()->getMethod());
+                }
+
+                if ($endpoint->hasSuccessfulResponse()) {
+                    $jsonSchemas = $symfonyRoute->getDefault('_jsonSchema');
+                    $routes[$routeName]->defineSuccessfulRequest($endpoint->getRequest(), $jsonSchemas['request']);
+                }
+
+                $routes[$routeName]->addResponse($endpoint->getResponse());
+            }
         }
 
         return $routes;
