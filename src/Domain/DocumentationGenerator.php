@@ -19,8 +19,14 @@ class DocumentationGenerator
 
     public function generate($routingFile, $outputFile)
     {
+        $routes = $this->router->loadRoutes($routingFile);
+
+        if (count($routes) <= 0) {
+            throw new \LogicException('No endpoint collected before running documentation generation. You should use CollectEndpointPlugin on your HttpClient.');
+        }
+
         $this->dumper->dump(
-            $this->outputFormatter->formatRoutes($this->router->loadRoutes($routingFile)),
+            $this->outputFormatter->formatRoutes($routes),
             $outputFile
         );
     }
