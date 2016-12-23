@@ -21,10 +21,11 @@ return [
     ],
     'documentation_generator.jadd.rezzza' => function (ContainerInterface $c) {
         return new Domain\DocumentationGenerator(
+            new CsvEndpointStorage(Domain\EndpointCollector::filename()),
             new SymfonyRouter(
-                new YamlFileLoader(new FileLocator($c->get('working.dir'))),
-                new Domain\EndpointCollector(new CsvEndpointStorage())
+                new YamlFileLoader(new FileLocator($c->get('working.dir')))
             ),
+            new Domain\CoverageChecker,
             new APIBlueprintFormatter(new FileReader($c->get('working.dir'))),
             new FilesystemDumper
         );

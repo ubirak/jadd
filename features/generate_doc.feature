@@ -4,6 +4,36 @@ Feature: Generate documentation from routing file and tests
     As a jadd user
     I should run documentation generation
 
+    Scenario: Run documentation generation without collecting
+        Given the tests have collected the following endpoints:
+            """
+            """
+        And my routing file "routing.yml" looks like:
+            """
+            hotel_get:
+                path: /hotels/{hotelId}
+                defaults: { _controller: ui.controller.hotel_controller:getHotelAction }
+                methods: [GET]
+                options:
+                    _documentation:
+                        description: Fetch a hotel
+
+            room_type_add:
+                path: /hotels/{hotelId}/room-types
+                defaults:
+                    _controller: ui.controller.hotel_controller:addRoomType
+                methods: [POST]
+                options:
+                    _documentation:
+                        description: Add room type on hotel
+
+            """
+        When I generate the documentation from the routing file "routing.yml"
+        Then it should fail with:
+            """
+            No endpoint collected before running documentation generation
+            """
+
     Scenario: Run documentation generation after collecting data from tests
         Given the tests have collected the following endpoints:
             """
@@ -47,16 +77,6 @@ Feature: Generate documentation from routing file and tests
                 options:
                     _documentation:
                         description: Fetch a hotel
-
-            room_type_add:
-                path: /hotels/{hotelId}/room-types
-                defaults:
-                    _controller: ui.controller.hotel_controller:addRoomType
-                methods: [POST]
-                options:
-                    _documentation:
-                        description: Add room type on hotel
-
             """
         When I generate the documentation from the routing file "routing.yml"
         Then the documentation should be like
@@ -119,4 +139,75 @@ Feature: Generate documentation from routing file and tests
                         {
                             "name": "hotel blue"
                         }
+            """
+
+    Scenario: Run documentation generation with missing valid request
+        Given the tests have collected the following endpoints:
+            """
+            POST,/hotels,,[],,400,application/json,[],"{""errors"": [""invalid data""]}"
+            """
+        And my routing file "routing.yml" looks like:
+            """
+            hotel_register:
+                path: /hotels
+                defaults:
+                    _controller: ui.controller.hotel_controller:postHotelAction
+                    _jsonSchema: { request: json_schema/request/hotel_register.json }
+                methods: [POST]
+                options:
+                    _documentation:
+                        description: Register a hotel
+            """
+        When I generate the documentation from the routing file "routing.yml"
+        Then it should pass with:
+            """
+            Missing valid requests (200 <= statusCode < 400):
+                * hotel_register
+            """
+        Then the documentation should be like
+            """
+            # Your project
+
+            ## Register a hotel [POST /hotels]
+
+            + Response 400 (application/json)
+
+                + Body
+
+                        {
+                            "errors": [
+                                "invalid data"
+                            ]
+                        }
+
+            """
+
+    Scenario: Run documentation generation with missing responses
+        Given the tests have collected the following endpoints:
+            """
+            POST,/hotels,application/json,[],"{""name"": ""hotel blue""}",201,application/json,"{""Location"":[""\/hotels\/123""]}",
+            """
+        And my routing file "routing.yml" looks like:
+            """
+            hotel_register:
+                path: /hotels
+                defaults:
+                    _controller: ui.controller.hotel_controller:postHotelAction
+                methods: [POST]
+                options:
+                    _documentation:
+                        description: Register a hotel
+            hotel_get:
+                path: /hotels/{hotelId}
+                defaults: { _controller: ui.controller.hotel_controller:getHotelAction }
+                methods: [GET]
+                options:
+                    _documentation:
+                        description: Fetch a hotel
+            """
+        When I generate the documentation from the routing file "routing.yml"
+        Then it should pass with:
+            """
+            Missing available responses:
+                * hotel_get
             """

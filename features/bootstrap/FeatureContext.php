@@ -34,6 +34,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
      */
     public static function cleanTestFolders()
     {
+        Domain\EndpointCollector::reset();
         $dir = self::workingDir();
 
         if (is_dir($dir)) {
@@ -169,6 +170,29 @@ class FeatureContext implements Context, SnippetAcceptingContext
         ;
     }
 
+    /**
+     * @Then /^it should (fail|pass) with:$/
+     */
+    public function itShouldTerminateWithStatusAndContent($exitStatus, PyStringNode $string)
+    {
+        if ('fail' === $exitStatus) {
+            $this->asserter->integer($this->getExitCode())->isEqualTo(1);
+        } elseif ('pass' === $exitStatus) {
+            $this->asserter->integer($this->getExitCode())->isEqualTo(0);
+        } else {
+            throw new \LogicException('Accepts only "fail" or "pass"');
+        }
+        $this->asserter->phpString($this->getOutput())->contains((string) $string);
+    }
+
+    /**
+     * @Then print output
+     */
+    public function printOutput()
+    {
+        echo $this->getOutput();
+    }
+
     private function createFile($filename, $content)
     {
         $path = dirname($filename);
@@ -211,5 +235,10 @@ class FeatureContext implements Context, SnippetAcceptingContext
             $output = str_replace(PHP_EOL, "\n", $output);
         }
         return trim(preg_replace("/ +$/m", '', $output));
+    }
+
+    private function getExitCode()
+    {
+        return $this->process->getExitCode();
     }
 }

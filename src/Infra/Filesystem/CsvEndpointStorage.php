@@ -11,6 +11,13 @@ class CsvEndpointStorage implements EndpointStorage
 {
     private $filename;
 
+    public function __construct($filename)
+    {
+        if (null !== $filename) {
+            $this->configureOutput($filename);
+        }
+    }
+
     public function configureOutput($filename)
     {
         $this->filename = $filename;

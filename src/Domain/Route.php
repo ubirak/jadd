@@ -18,10 +18,9 @@ class Route
 
     private $availableResponses = [];
 
-    public function __construct($id, $method, $path, $variables, $description)
+    public function __construct($id, $path, $variables, $description)
     {
         $this->id = $id;
-        $this->method = $method;
         $this->path = $path;
         $this->variables = $variables;
         $this->description = $description;
@@ -52,7 +51,12 @@ class Route
         return $this->variables;
     }
 
-    public function defineRequest(ApiRequest $request, $jsonSchema)
+    public function defineMethod($method)
+    {
+        $this->method = $method;
+    }
+
+    public function defineSuccessfulRequest(ApiRequest $request, $jsonSchema)
     {
         $request->setJsonSchema($jsonSchema);
         $this->request = $request;
