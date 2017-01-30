@@ -16,7 +16,7 @@ class ApiResponse
     {
         $this->statusCode = $statusCode;
         $this->setContentType($contentType);
-        if (strlen($body) > 0) {
+        if ($this->isValidJson($body)) {
             $this->body = json_encode($this->cleanJson($body));
         }
         $this->headers = $headers;
@@ -44,7 +44,7 @@ class ApiResponse
 
     public function mergeBody($body)
     {
-        if (strlen($body) > 0) {
+        if ($this->isValidJson($body)) {
             $bodyDecoded = json_decode($this->body, true);
             $this->body = json_encode(($bodyDecoded ?: []) + $this->cleanJson($body));
         }
@@ -72,5 +72,10 @@ class ApiResponse
             $contentType = implode(', ', $contentType);
         }
         $this->contentType = $contentType;
+    }
+
+    private function isValidJson($body)
+    {
+        return 0 < strlen($body) && null !== json_decode($body, true);
     }
 }
