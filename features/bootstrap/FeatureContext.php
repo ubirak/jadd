@@ -2,12 +2,10 @@
 
 use mageekguy\atoum\asserter;
 use Behat\Gherkin\Node\PyStringNode;
-use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
 use Behat\Behat\Context\SnippetAcceptingContext;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\PhpExecutableFinder;
-
 use Rezzza\Jadd\Domain;
 
 class FeatureContext implements Context, SnippetAcceptingContext
@@ -25,7 +23,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
     public function __construct()
     {
         $this->workingDir = self::workingDir().DIRECTORY_SEPARATOR.md5(microtime() * rand(0, 10000));
-        $this->asserter = new asserter\generator;
+        $this->asserter = new asserter\generator();
     }
 
     /**
@@ -47,7 +45,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
      */
     public function prepareScenario()
     {
-        mkdir($this->workingDir . '/features/bootstrap', 0777, true);
+        mkdir($this->workingDir.'/features/bootstrap', 0777, true);
 
         $phpFinder = new PhpExecutableFinder();
 
@@ -75,7 +73,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
     public function aFileNamedWith($filename, PyStringNode $fileContent)
     {
         $content = strtr((string) $fileContent, array("'''" => '"""'));
-        $this->createFile($this->workingDir . '/' . $filename, $content);
+        $this->createFile($this->workingDir.'/'.$filename, $content);
     }
 
     /**
@@ -206,7 +204,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
 
     public static function workingDir()
     {
-        return sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'json-api-behat';
+        return sys_get_temp_dir().DIRECTORY_SEPARATOR.'json-api-behat';
     }
 
     private static function clearDirectory($path)
@@ -216,7 +214,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
         array_shift($files);
 
         foreach ($files as $file) {
-            $file = $path . DIRECTORY_SEPARATOR . $file;
+            $file = $path.DIRECTORY_SEPARATOR.$file;
             if (is_dir($file)) {
                 self::clearDirectory($file);
             } else {
@@ -229,12 +227,13 @@ class FeatureContext implements Context, SnippetAcceptingContext
 
     private function getOutput()
     {
-        $output = $this->process->getErrorOutput() . $this->process->getOutput();
+        $output = $this->process->getErrorOutput().$this->process->getOutput();
         // Normalize the line endings in the output
         if ("\n" !== PHP_EOL) {
             $output = str_replace(PHP_EOL, "\n", $output);
         }
-        return trim(preg_replace("/ +$/m", '', $output));
+
+        return trim(preg_replace('/ +$/m', '', $output));
     }
 
     private function getExitCode()
