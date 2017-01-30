@@ -83,7 +83,7 @@ class FeatureContext implements Context, SnippetAcceptingContext
     {
         $fixturesFile = sprintf('%s/features/fixtures.yml', $this->workingDir);
         file_put_contents($fixturesFile, '[]');
-        $this->moco = new Process(sprintf('bin/moco start -p 9999 -c %s', $fixturesFile));
+        $this->moco = new Process(sprintf('exec bin/moco start -p 9999 -c %s', $fixturesFile));
         $this->moco->start();
         sleep(2); // Let moco start
     }
