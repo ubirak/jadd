@@ -8,15 +8,12 @@ use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\Loader\YamlFileLoader;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 
-use Rezzza\Jadd\Domain\EndpointCollector;
 use Rezzza\Jadd\Domain\Route;
 use Rezzza\Jadd\Domain\Router;
 
 class SymfonyRouter implements Router
 {
     private $routeLoader;
-
-    private $endpointCollector;
 
     public function __construct(YamlFileLoader $routeLoader)
     {

@@ -35,7 +35,7 @@ composer require --dev rezzza/jadd:dev-master
 
 ## Routing supported
 
-- Symfony YAML
+- Symfony YAML (Don't support YAML + `@Route` Annotation in Controller)
 
 ## Output supported
 
